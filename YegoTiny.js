@@ -1,7 +1,9 @@
-import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import React, { useEffect } from 'react';
+import { View, Text, StyleSheet, PermissionsAndroid } from 'react-native';
+import RNLocation from 'react-native-location';
 import MapView from 'react-native-maps';
 import { Provider } from 'react-redux';
+
 
 import configureStore from './src/configureStore';
 import { makeCancelable } from './static/misc/utils';
@@ -15,25 +17,40 @@ const styles = StyleSheet.create({
   },
 });
 
-class YegoTiny extends React.Component {
-  constructor(props) {
-    super(props)
+const YegoTiny = (props) => {
 
-    this.state = {}
-  }
+  useEffect(() => {
+    RNLocation.configure({
+      distanceFilter: 5.0
+    })
 
-  componentDidMount() {
-    this.configureStore = makeCancelable(configureStore());
-    this.configureStore.promise.then(store => {
-      this.setState({store});
-    }).catch(e => console.warn("configureStore canceled:", e && e.message ? e.message : e));
-  }
+    RNLocation.requestPermission({
+      android: {
+        detail: "fine"
+      }
+    }).then(granted => {
+      if (granted) {
+        console.log('Im here')
+        const loc = RNLocation.subscribeToLocationUpdates(locations => console.log('LOCI', locations))
+      }
+    })
 
-  componentWillUnmount() {
-    if (this.configureStore) this.configureStore.cancel();
-  }
+    // RNLocation.checkPermission({
+    //   android: {
+    //     detail: "fine"
+    //   }
+    // })
 
-  render() {
+    // const granted = PermissionsAndroid.check(PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION).then(granted => {
+    //   if (granted) {
+    //     console.log('USE IT')
+    //   } else {
+    //     console.log('GO AWAY')
+    //   }
+    // })
+    
+  }, []);
+
     // if (this.state.store) {
       return (
         // <Provider store={this.state.store}>
@@ -44,16 +61,10 @@ class YegoTiny extends React.Component {
         // </View>
         <MapView
         style={styles.map}
-    initialRegion={{
-      latitude: 37.78825,
-      longitude: -122.4324,
-      latitudeDelta: 0.0922,
-      longitudeDelta: 0.0421,
-    }}
-   />
+        showsUserLocation={true}
+     />
       )
-    }
+}
     // return null
-  }
 
 export default YegoTiny
