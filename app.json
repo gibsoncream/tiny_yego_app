@@ -1,4 +1,7 @@
 {
   "name": "TinyYego",
-  "displayName": "TinyYego"
+  "displayName": "TinyYego",
+    "expo": {
+      "sdkVersion": "31.0.0"
+  }
 }
