@@ -1,36 +1,35 @@
+import axios from 'axios';
 
 export const api = store => next => action => {
   if (!action.api) return next(action);
 
   const { api } = action;
-  console.log('API', api)
 
-  // const method = api.method || 'GET';
+  const method = api.method || 'GET';
   // // const body = api.body ? JSON.stringify(api.body) : undefined;
-  // // const body = JSON.stringify(api.body);
-  const token = {
-    api_token: "GI58lTEb98VvjzUFnrnMJuehn5E8PA6LX8bGNgLmNq2CVaUnIZqCyLWmcgHk"
-  } 
-  // const headers = {
-  //   'Content-Type': 'application/json'
-  // }
+  // const params2 = api.body;
+  // console.log('22222222222222', params2)
+    
+    const headers = {
+      "Content-Type": "application/json"
+    }
+    
+    const params = {
+      "api_token": "GI58lTEb98VvjzUFnrnMJuehn5E8PA6LX8bGNgLmNq2CVaUnIZqCyLWmcgHk"
+    }
+    // console.log('UAAAAAAAAA', params)
 
   next({
     type: `${action.type}_LOADING`
   })
 
-  fetch(api.url, {
-    method: 'GET',
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify(token),
+  axios(api.url, {
+    method,
+    headers,
+    params
   })
-    .then(res => {
-      console.log('HEY', res)
-      return res.json()})
+    .then(res => res.data)
     .then(data => {
-      console.log('UUUUU', data)
       store.dispatch({
         type: `${action.type}_SUCCESS`,
         data
@@ -43,5 +42,4 @@ export const api = store => next => action => {
         error
       });
     });
-
 }

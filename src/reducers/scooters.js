@@ -1,21 +1,18 @@
 import * as ActionTypes from '../actions/scooterTypes';
 
-const initialState = {
-}
-
-export default function reducer(state = initialState, action) {
+export default (state = null, action) => {
   switch (action.type) {
     case `${ActionTypes.GET_SCOOTERS}_SUCCESS`:
-      console.log('HERE')
+      console.log('LOOOGI', action.data)
       return {
         ...state,
-        ...action.data,
+        yegos: [...action.data],
         loading: false
       } 
       case `${ActionTypes.GET_SCOOTERS}_FAILURE`:
         return {
           ...state,
-          ...action.error,
+          errors: [...state.errors, ...action.error],
           loading: false
         }
         case `${ActionTypes.GET_SCOOTERS}_LOADING`:
