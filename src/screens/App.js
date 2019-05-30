@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { StyleSheet, Text, View, Image, Dimensions } from 'react-native';
 import MapView, { Marker } from 'react-native-maps';
 import RNLocation from 'react-native-location';
@@ -6,6 +6,8 @@ import { connect } from 'react-redux'
 import * as Actions from '../actions/index';
 
 const App = (props) => {
+
+  const [details, setDetails] = useState({});
 
   // useEffect(() => {
   //   RNLocation.configure({
@@ -27,6 +29,12 @@ const App = (props) => {
   useEffect(() => {
     props.getScooters();
   }, []);
+
+  const setter = (e, yego) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDetails(yego)
+  };
   
   const myScreenHeight = Math.round(Dimensions.get('window').height);
 
@@ -51,9 +59,16 @@ const App = (props) => {
       left: 0,
       right: 0,
       bottom: 0
+    },
+    name: {
+      fontSize: 50,
+      fontWeight: 'bold',
+    },
+    battery: {
+      fontSize: 40
     }
   });
-  
+
     return (
       <View style={styles.container}>
       <MapView
@@ -74,12 +89,14 @@ const App = (props) => {
                 latitude: scooter.lat,
                 longitude: scooter.lng
               }}
+              onPress={(e) => setter(e, scooter)}
               />
               )
             })}
         </MapView>
         <View style={styles.bottomView}>
-          <Text>Hello</Text>
+          <Text style={styles.name}>{details.name}</Text>
+          <Text style={styles.battery}>{details.battery}</Text>
         </View>
         </View>
     );
