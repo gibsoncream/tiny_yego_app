@@ -1,1 +1,2 @@
 export const GET_SCOOTERS = 'GET_SCOOTERS';
+export const SET_USER_LOCATION = 'SET_USER_LOCATION';

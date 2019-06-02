@@ -1,29 +1,33 @@
 import React, { useEffect, useState } from 'react';
 import { StyleSheet, Text, View, Image, Dimensions } from 'react-native';
 import MapView, { Marker } from 'react-native-maps';
+import { getDistance } from 'geolib';
 import RNLocation from 'react-native-location';
 import { connect } from 'react-redux'
 import * as Actions from '../actions/index';
+import OrangePin from '../pins/orangePin.png';
+import RedPin from '../pins/redPin.png';
+import BluePin from '../pins/bluePin.png';
+import BlackPin from '../pins/blackPin.png';
 
 const App = (props) => {
 
   const [details, setDetails] = useState({});
 
-  // useEffect(() => {
-  //   RNLocation.configure({
-  //     distanceFilter: 5.0
-  //   })
-
-  //   RNLocation.requestPermission({
-  //     android: {
-  //       detail: "fine"
-  //     }
-  //   }).then(granted => {
-  //     if (granted) {
-  //       const loc = RNLocation.subscribeToLocationUpdates(locations => console.log('LOCI', locations))
-  //     }
-  //   })
-  // }, []);
+  useEffect(() => {
+    RNLocation.configure({
+      distanceFilter: 5.0
+    })
+    RNLocation.requestPermission({
+      android: {
+        detail: "fine"
+      }
+    }).then(granted => {
+      if (granted) {
+        RNLocation.subscribeToLocationUpdates(location => props.setUserLocation(location));
+      };
+    });
+  }, []);
 
   
   useEffect(() => {
@@ -31,12 +35,19 @@ const App = (props) => {
   }, []);
 
   const setter = (e, yego) => {
-    e.preventDefault();
+    console.log('E', e)
     e.stopPropagation();
-    setDetails(yego)
+    e.preventDefault();
+    setDetails(yego);
   };
   
   const myScreenHeight = Math.round(Dimensions.get('window').height);
+
+  const pinColorChecker = (scooter) => {
+    if (scooter.status === 0) return OrangePin;
+    else if (scooter.status === 1) return BlackPin;
+    else return RedPin;
+  };
 
   const styles = StyleSheet.create({
     container: {
@@ -69,22 +80,23 @@ const App = (props) => {
     }
   });
 
-    return (
-      <View style={styles.container}>
+  return (
+    <View style={styles.container}>
       <MapView
       style={styles.map}
-        region={{
-          latitude: 41.388998444,
-          longitude: 2.13999944,
-          latitudeDelta: 0.015,
-          longitudeDelta: 0.0121,
-          }}
+      initialRegion={{
+        latitude: 41.388998444,
+        longitude: 2.13999944,
+        latitudeDelta: 0.015,
+        longitudeDelta: 0.0121,
+      }}
         showsUserLocation={true}
+        loadingEnabled={true}
         >
           {props.scooters.map((scooter, i) => {
             return (
               <Marker key={i}
-              color={"red"}
+              icon={pinColorChecker(scooter)}
               coordinate={{
                 latitude: scooter.lat,
                 longitude: scooter.lng
@@ -97,15 +109,29 @@ const App = (props) => {
         <View style={styles.bottomView}>
           <Text style={styles.name}>{details.name}</Text>
           <Text style={styles.battery}>{details.battery}</Text>
+          <Text style={styles.battery}>{details.distanceFromUser}</Text>
         </View>
         </View>
     );
-}
+  }
 
-const mapStateToProps = state => ({
-    scooters: state.scooters.yegos
-});
+const mapStateToProps = state => {
+  const userLocation = state.scooters.userLocation;
+  const scooters = state.scooters.yegos;
+    scooters.forEach(scooter => {
+      scooter.distanceFromUser = getDistance(
+        {latitude: userLocation.latitude, longitude: userLocation.longitude},
+        {latitude: scooter.lat, longitude: scooter.lng} 
+        )
+    })
+  return {
+    scooters: scooters
+  }
+};
 
-const mapDispatchToProps = { getScooters: Actions.getScooters };
+const mapDispatchToProps = { 
+  getScooters: Actions.getScooters,
+  setUserLocation: Actions.setUserLocation
+ };
 
 export default connect(mapStateToProps, mapDispatchToProps)(App);

@@ -3,7 +3,6 @@ import * as ActionTypes from '../actions/scooterTypes';
 export default (state = null, action) => {
   switch (action.type) {
     case `${ActionTypes.GET_SCOOTERS}_SUCCESS`:
-      console.log('LOOOGI', action.data)
       return {
         ...state,
         yegos: [...action.data],
@@ -12,14 +11,23 @@ export default (state = null, action) => {
       case `${ActionTypes.GET_SCOOTERS}_FAILURE`:
         return {
           ...state,
-          errors: [...state.errors, ...action.error],
+          errors: action.error,
           loading: false
         }
         case `${ActionTypes.GET_SCOOTERS}_LOADING`:
           return {
-        ...state,
-        loading: true
-      }
+            ...state,
+            loading: true
+          }
+          case `${ActionTypes.SET_USER_LOCATION}`:
+        console.log('LOOOGI', action.userLocation)
+        return {
+          ...state,
+          userLocation: {
+            latitude: action.userLocation[0].latitude,
+            longitude: action.userLocation[0].longitude
+          }
+        }
       default:
       return state
   }

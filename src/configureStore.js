@@ -1,6 +1,7 @@
 import {
   applyMiddleware,
-  createStore
+  createStore,
+  compose
 } from 'redux'
 //import thunk from 'redux-thunk' was put into create store with middleware
 import lodash from 'lodash'
@@ -13,8 +14,7 @@ import {
 
 import { api } from './middlewares/api';
 
-const blacklistedKeys = [
-]
+const blacklistedKeys = []
 
 export default async function() {
   const cachedState = lodash.omit(await getCachedState(), blacklistedKeys)
