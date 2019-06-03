@@ -1,9 +1,7 @@
 import {
   applyMiddleware,
   createStore,
-  compose
 } from 'redux'
-//import thunk from 'redux-thunk' was put into create store with middleware
 import lodash from 'lodash'
 
 import reducers from './reducers'

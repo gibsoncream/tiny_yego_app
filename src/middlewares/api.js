@@ -6,18 +6,11 @@ export const api = store => next => action => {
   const { api } = action;
 
   const method = api.method || 'GET';
-  // // const body = api.body ? JSON.stringify(api.body) : undefined;
-  // const params2 = api.body;
-  // console.log('22222222222222', params2)
+  const params = api.body;
     
-    const headers = {
-      "Content-Type": "application/json"
-    }
-    
-    const params = {
-      "api_token": "GI58lTEb98VvjzUFnrnMJuehn5E8PA6LX8bGNgLmNq2CVaUnIZqCyLWmcgHk"
-    }
-    // console.log('UAAAAAAAAA', params)
+  const headers = {
+    "Content-Type": "application/json"
+  }
 
   next({
     type: `${action.type}_LOADING`
@@ -36,7 +29,6 @@ export const api = store => next => action => {
       });
     })
     .catch(error => {
-      console.log('Failing', error)
       store.dispatch({
         type: `${action.type}_FAILURE`,
         error

@@ -3,7 +3,7 @@ import { Provider } from 'react-redux';
 
 import configureStore from './src/configureStore';
 import { makeCancelable } from './static/misc/utils';
-import AppContainer from './src/containers/AppContainer';
+import App from './src/components/App';
 
 class YegoTiny extends React.Component {
   constructor(props) {
@@ -27,7 +27,7 @@ class YegoTiny extends React.Component {
     if (this.state.store) {
       return (
         <Provider store={this.state.store}>
-          <AppContainer/>
+          <App/>
         </Provider>
       )
     }
