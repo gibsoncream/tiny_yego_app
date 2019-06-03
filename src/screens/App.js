@@ -10,10 +10,12 @@ import RedPin from '../pins/redPin.png';
 import BluePin from '../pins/bluePin.png';
 import BlackPin from '../pins/blackPin.png';
 
-const App = (props) => {
+const App = ({ userLocation, scooters, availableScooters,getScooters, setUserLocation }) => {
 
   const [details, setDetails] = useState({});
   const [mapRegion, setMapRegion] = useState({});
+  const [goForward, setGoForward] = useState(true)
+  const [goBackwards, setGoBackwards] = useState(true)
 
   useEffect(() => {
     RNLocation.configure({
@@ -26,7 +28,7 @@ const App = (props) => {
     }).then(granted => {
       if (granted) {
         RNLocation.subscribeToLocationUpdates(location => {
-          props.setUserLocation(location)
+          setUserLocation(location)
           setMapRegion({
             latitude: 41.388998444,
             longitude: 2.13999944,
@@ -40,35 +42,60 @@ const App = (props) => {
 
   
   useEffect(() => {
-    props.getScooters();
-    setDetails(props.scooters[0])
+    refreshScooters();
   }, []);
+
+  const setRegionOnMap = (lat, lng) => {
+    setMapRegion({
+      latitude: lat,
+      longitude: lng,
+      latitudeDelta: 0.015,
+      longitudeDelta: 0.0121,
+    })
+  };
   
   const selectScooter = (e, scooter) => {
     e.stopPropagation();
     e.preventDefault();
     if (scooter.status === 0) {
       setDetails(scooter)
-      setMapRegion({
-        latitude: scooter.lat,
-        longitude: scooter.lng,
-        latitudeDelta: 0.015,
-        longitudeDelta: 0.0121,
-      })
+      setRegionOnMap(scooter.lat, scooter.lng)
     } else return null;
   };
   
 
-  const pinColorChecker = (scooter) => {
+  const pinColorSetter = (scooter) => {
     if (scooter.status === 0) return OrangePin;
     else if (scooter.status === 1) return BlackPin;
     else return RedPin;
   };
 
+  const refreshScooters = () => {
+    getScooters();
+    setDetails(availableScooters[0]);
+    setRegionOnMap(availableScooters[0].lat, availableScooters[0].lng)
+  };
+
+  const selectNextScooter = (direction) => {
+    let index = availableScooters.map(scooter => scooter.id).indexOf(details.id);
+    if (direction === 'back') {
+      if (availableScooters[index - 1]) {
+        setDetails(availableScooters[index - 1])
+        setRegionOnMap(availableScooters[index - 1].lat, availableScooters[index - 1].lng)
+        setGoForward(true);
+      } else setGoBackwards(false)
+   } if (direction === 'forward')
+      if (availableScooters[index + 1].distanceFromUser < 1200) {
+      setDetails(availableScooters[index + 1])
+      setRegionOnMap(availableScooters[index + 1].lat, availableScooters[index + 1].lng)
+      setGoBackwards(true);
+    } else setGoForward(false)
+  };
+
   const setOnUser = () => {
     setMapRegion({
-      latitude: props.userLocation.latitude,
-      longitude: props.userLocation.longitude,
+      latitude: userLocation.latitude,
+      longitude: userLocation.longitude,
       latitudeDelta: 0.015,
       longitudeDelta: 0.0121,
     })
@@ -122,10 +149,10 @@ const App = (props) => {
       showsUserLocation={true}
       loadingEnabled={true}
         >
-          {props.scooters.map((scooter, i) => {
+          {scooters.map((scooter, i) => {
             return (
               <Marker key={i}
-              icon={details.id === scooter.id ? BluePin : pinColorChecker(scooter)}
+              icon={details.id === scooter.id ? BluePin : pinColorSetter(scooter)}
               coordinate={{
                 latitude: scooter.lat,
                 longitude: scooter.lng
@@ -138,7 +165,10 @@ const App = (props) => {
         <View style={styles.bottomView}>
           <View style={styles.buttons}>
           <Button 
-          title="Previous yego"/>
+          title="Previous yego"
+          onPress={() => selectNextScooter('back')}
+          disabled={goBackwards ? false : true}
+          />
           <Button 
           title="Recenter map"
           onPress={() => setOnUser()}
@@ -151,10 +181,13 @@ const App = (props) => {
           </View>
           <View style={styles.buttons}>
           <Button
-          title="Next yego" />
+          title="Next yego"
+          disabled={goForward ? false : true}
+          onPress={() => selectNextScooter('forward')}
+          />
           <Button
           title="Refresh yegos"
-          onPress={() => props.getScooters()}
+          onPress={() => refreshScooters()}
           />
           </View>
         </View>
@@ -173,10 +206,11 @@ const mapStateToProps = state => {
         )
     });
     scooters.sort((a, b) => a.distanceFromUser - b.distanceFromUser);
+    const availableScooters = scooters.filter(scooter => scooter.status === 0)
   return {
     userLocation: state.scooters.userLocation,
     scooters: scooters,
-    selectedYego: scooters[0]
+    availableScooters: availableScooters
   }
 };
 
