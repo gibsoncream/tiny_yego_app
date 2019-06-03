@@ -20,7 +20,6 @@ export default (state = null, action) => {
             loading: true
           }
           case `${ActionTypes.SET_USER_LOCATION}`:
-        console.log('LOOOGI', action.userLocation)
         return {
           ...state,
           userLocation: {
